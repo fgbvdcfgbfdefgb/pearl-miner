@@ -294,8 +294,9 @@ class OfflineStratumBridge:
             self.server_sock.bind((self.host, self.port))
             self.server_sock.listen(16)
             log_info(f"{GREEN}Local Stratum Loopback Server active at {self.host}:{self.port}{RESET}")
-            log_info(f"Forge Miner command: {BOLD}./forgeminer/forge --algorithm pearlhash --pool {self.host}:{self.port} --wallet krxYRPV4WQ --worker rig1 --tls false{RESET}")
-            log_info(f"BzMiner command:     {BOLD}bzminer -a pearl -p stratum+tcp://{self.host}:{self.port} -w krxYRPV4WQ{RESET}")
+            log_info(f"PeakMiner command:  {BOLD}./peakminer/peakminer -o stratum+tcp://{self.host}:{self.port} -u krxYRPV4WQ.rig1 -p x -c pearl{RESET}")
+            log_info(f"ForgeMiner command: {BOLD}./forgeminer/forge --algorithm pearlhash --pool {self.host}:{self.port} --wallet krxYRPV4WQ --worker rig1 --tls false{RESET}")
+            log_info(f"BzMiner command:    {BOLD}bzminer -a pearl -p stratum+tcp://{self.host}:{self.port} -w krxYRPV4WQ{RESET}")
             t = threading.Thread(target=self._accept_loop, daemon=True)
             t.start()
         except Exception as e:
@@ -397,13 +398,13 @@ class OfflineStratumBridge:
                     log_share(f"{GREEN}External miner submitted share for Job ID: {job_id}{RESET}")
 
                     share_entry = {
-                        "share_id": f"share_forge_{int(time.time()*1000)}",
+                        "share_id": f"share_external_{int(time.time()*1000)}",
                         "job_id": job_id,
                         "plain_proof": proof,
                         "hs": hs,
                         "params": params,
                         "method": "mining.submit",
-                        "device": "forge_miner"
+                        "device": "peakminer"
                     }
                     if self.share_mgr:
                         self.share_mgr.record_share(share_entry)
@@ -596,7 +597,7 @@ class PearlMiner:
         print(f"Jobs Source:     {BOLD}{self.jobs_path}{RESET}")
         print(f"Shares Output:   {BOLD}{self.share_mgr.filepath}{RESET}")
         print(f"Internet Access: {RED}{BOLD}NONE (Fully Offline){RESET}")
-        print(f"Stratum Server:  {BOLD}{self.stratum_host}:{self.stratum_port}{RESET} (for ForgeMiner / BzMiner)")
+        print(f"Stratum Server:  {BOLD}{self.stratum_host}:{self.stratum_port}{RESET} (for PeakMiner / ForgeMiner)")
         print(f"Stratum-Only:    {BOLD}{'YES' if self.stratum_only else 'NO'}{RESET}")
 
         if not self.stratum_only:

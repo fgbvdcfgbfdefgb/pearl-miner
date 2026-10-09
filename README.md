@@ -1,8 +1,8 @@
-# Pearl (PRL) Offline Mining System & Stratum Bridge
+# Pearl (PRL) Offline Mining System & Stratum Bridge with PeakMiner
 
 A complete offline mining and bridge system designed for **Pearl (PRL)** cryptocurrency mining on Kryptex pool (`prl.kryptex.network:7048`) with wallet `krxYRPV4WQ`.
 
-This setup bridges an **online connector machine** with internet access to an **isolated offline mining rig** (without internet access) using GitHub (`fgbvdcfgbfdefgb/pearl-miner`) as an asynchronous synchronization channel.
+This setup bridges an **online connector machine** with internet access to an **isolated offline mining rig** (without internet access) using GitHub (`fgbvdcfgbfdefgb/pearl-miner`) as an asynchronous synchronization channel, powered by **PeakMiner v2.18.1** for GPU mining.
 
 ---
 
@@ -31,7 +31,7 @@ This setup bridges an **online connector machine** with internet access to an **
 |                                                                      |
 |  - jobs.txt   : Current active Pearl mining job from Kryptex pool    |
 |  - shares.txt : Found shares with cryptographic proofs & statuses    |
-|  - forgeminer/: Upstream ForgeMiner v1.8.5 binaries & release files  |
+|  - peakminer/ : Upstream PeakMiner v2.18.1 binaries & release files  |
 +----------------------------------+-----------------------------------+
                                    | Git UI Manual Pull / Push
                                    v
@@ -41,46 +41,46 @@ This setup bridges an **online connector machine** with internet access to an **
 |  miner.py                                                            |
 |    - Reads mining jobs from 'jobs.txt'                               |
 |    - Hosts local Stratum pool server on 127.0.0.1:3333               |
-|    - Broadcasts live jobs to local hardware miners (ForgeMiner)      |
+|    - Broadcasts live jobs to local PeakMiner GPU instances           |
 |    - Captures submitted shares & appends to 'shares.txt'             |
-|    - (Optional) Multi-GPU CUDA & Multi-core CPU native worker engine |
+|    - (Optional) Native CPU/GPU fallback worker engine                |
 |                                                                      |
-|  ForgeMiner (forge / forge.exe)                                      |
+|  PeakMiner (peakminer / peakminer.exe)                               |
 |    - Connects to 127.0.0.1:3333 (miner.py local Stratum bridge)      |
-|    - Mines PearlHash on NVIDIA GPUs offline                          |
+|    - Mines Pearl (pearlhash) on NVIDIA & AMD GPUs offline            |
 |    - Submits valid proof shares to local miner.py                    |
 +----------------------------------------------------------------------+
 ```
 
 ---
 
-## 1. ForgeMiner Integration
+## 1. PeakMiner Integration
 
-The repository includes pre-downloaded, verified **ForgeMiner v1.8.5** binaries and upstream release archives:
+The repository includes pre-downloaded, verified **PeakMiner v2.18.1** binaries and upstream release packages:
 
-- **Linux x86_64 binary**: `forgeminer/forge` (chmod +x)
-- **Windows x86_64 binary**: `forgeminer/forge.exe`
-- **Linux Release Archive**: `forgeminer/v1.8.5/ForgeMiner-1.8.5-linux.tar.gz`
-- **Windows Release Archive**: `forgeminer/v1.8.5/ForgeMiner-1.8.5-windows.zip`
-- **Checksums**: `forgeminer/v1.8.5/SHA256SUMS`
+- **Linux x86_64 binary**: `peakminer/peakminer` (chmod +x)
+- **Windows x86_64 binary**: `peakminer/peakminer.exe`
+- **Linux Release Archive**: `peakminer/v2.18.1/peakminer-2.18.1.tar.gz`
+- **Windows Release Archive**: `peakminer/v2.18.1/peakminer-2.18.1-windows-x86_64.zip`
+- **Checksums**: `peakminer/v2.18.1/SHA256SUMS`
 
-### Launching ForgeMiner
+### Launching PeakMiner
 
 Once `miner.py` is running on the offline machine (listening on `127.0.0.1:3333`):
 
 #### On Linux:
 ```bash
-./start_forge_miner.sh
+./start_peak_miner.sh
 ```
 Or directly:
 ```bash
-./forgeminer/forge --algorithm pearlhash --pool 127.0.0.1:3333 --wallet krxYRPV4WQ --worker forge-gpu --tls false
+./peakminer/peakminer -o stratum+tcp://127.0.0.1:3333 -u krxYRPV4WQ.peak-gpu -p x -c pearl
 ```
 
 #### On Windows:
-Double-click `start_forge_miner.bat` or run in CMD / PowerShell:
+Double-click `start_peak_miner.bat` or run in CMD / PowerShell:
 ```cmd
-forgeminer\forge.exe --algorithm pearlhash --pool 127.0.0.1:3333 --wallet krxYRPV4WQ --worker forge-win-gpu --tls false
+peakminer\peakminer.exe -o stratum+tcp://127.0.0.1:3333 -u krxYRPV4WQ.peak-win-gpu -p x -c pearl
 ```
 
 ---
@@ -91,20 +91,15 @@ Runs on the machine without internet access. It reads `jobs.txt`, hosts the loca
 
 ### Usage Modes
 
-#### A. Full Mining Mode (Stratum Server + Native GPU & CPU Mining):
-```bash
-python3 miner.py
-```
-
-#### B. Stratum Server Only (Dedicated bridge for ForgeMiner):
-If you want ForgeMiner to handle all GPU mining with 0% CPU/GPU overhead from `miner.py`:
+#### A. Stratum Server Only (Recommended with PeakMiner):
+Runs exclusively as the local Stratum bridge for PeakMiner with 0% CPU/GPU overhead:
 ```bash
 python3 miner.py --stratum-only
 ```
 
-#### C. Customizing Hardware & Network:
+#### B. Full Mining Mode (Stratum Server + Native Workers):
 ```bash
-python3 miner.py --stratum-port 3333 --cpu-threads 4 --no-gpu
+python3 miner.py
 ```
 
 ### CLI Arguments:
@@ -120,7 +115,7 @@ python3 miner.py --stratum-port 3333 --cpu-threads 4 --no-gpu
 
 ## 3. Online Connector (`connector.py`)
 
-Runs on the machine with internet access. It connects to the live Kryptex pool, uploads the latest jobs to GitHub at intervals of 30 seconds, and continuously checks `shares.txt` for real-time submission back to the pool.
+Runs on the machine with internet access. It connects to the live Kryptex pool, uploads latest jobs to GitHub at intervals of 30 seconds, and continuously checks `shares.txt` for real-time submission back to the pool.
 
 ### Usage:
 
@@ -158,21 +153,21 @@ python3 connector.py \
 
 2. **Sync Repository on Offline Machine**:
    - Pull latest changes via your Git UI (or git clone/pull).
-   - This pulls the latest `jobs.txt` and ForgeMiner files.
+   - This pulls the latest `jobs.txt` and PeakMiner files.
 
 3. **Start Offline Miner**:
    ```bash
-   python3 miner.py
+   python3 miner.py --stratum-only
    ```
    *The miner loads `jobs.txt` and opens the local Stratum server on `127.0.0.1:3333`.*
 
-4. **Start ForgeMiner**:
+4. **Start PeakMiner**:
    ```bash
-   ./start_forge_miner.sh
+   ./start_peak_miner.sh
    ```
-   *ForgeMiner connects locally to `127.0.0.1:3333`, receives the active job, and begins mining PRL on your GPUs.*
+   *PeakMiner connects locally to `127.0.0.1:3333`, receives the active job, and begins mining PRL on your GPUs.*
 
 5. **Submit Discovered Shares**:
-   - As ForgeMiner (or internal workers) finds valid shares, `miner.py` immediately appends them to `shares.txt`.
+   - As PeakMiner finds valid shares, `miner.py` immediately appends them to `shares.txt`.
    - On the offline machine, push `shares.txt` to GitHub using your Git UI.
    - The online `connector.py` instantly detects the new shares, submits them to Kryptex pool, and records acceptance back to the repository.

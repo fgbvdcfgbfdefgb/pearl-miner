@@ -1,10 +1,10 @@
 {
-  "job_id": "c7782ae9_2097152",
-  "header": "00000020c3eeef9680efad05dd4243386bb5d91c2de2d35868b1c744a21b4694f79a4f7888dd00246992c2ea151fb482b2b0d82a32819c41d1bc0d7e787ba8228a713b0eec85c86aa7967c17",
+  "job_id": "e191470e_2097152",
+  "header": "000000205bd4e7f7706fd9dcd9247fd30d4d9f6e6de4dfac4bcae0d59eb64fe83bb354186efca722f6a31c317a64de1d65132e0815f87a944c782a4f698c127f6dfdb72f0486c86a10927c17",
   "target": "00000000000007ffffffffffffffffffffffffffffffffffffffffffffffffff",
-  "height": 125264,
+  "height": 125265,
   "cert_version": 3,
-  "received_at": "2026-10-09T06:13:04.738221+00:00",
+  "received_at": "2026-10-09T06:13:24.978857+00:00",
   "pool": "prl.kryptex.network:7048",
   "wallet": "krxYRPV4WQ",
   "worker": "rig01",
@@ -12,9 +12,9 @@
     "id": null,
     "method": "mining.notify",
     "params": {
-      "header": "00000020c3eeef9680efad05dd4243386bb5d91c2de2d35868b1c744a21b4694f79a4f7888dd00246992c2ea151fb482b2b0d82a32819c41d1bc0d7e787ba8228a713b0eec85c86aa7967c17",
-      "height": 125264,
-      "job_id": "c7782ae9_2097152",
+      "header": "000000205bd4e7f7706fd9dcd9247fd30d4d9f6e6de4dfac4bcae0d59eb64fe83bb354186efca722f6a31c317a64de1d65132e0815f87a944c782a4f698c127f6dfdb72f0486c86a10927c17",
+      "height": 125265,
+      "job_id": "e191470e_2097152",
       "target": "00000000000007ffffffffffffffffffffffffffffffffffffffffffffffffff",
       "cert_version": 3
     }

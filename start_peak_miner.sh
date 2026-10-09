@@ -8,9 +8,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PEAK_BIN=""
 
 # Locate the peakminer binary
-if [ -x "$SCRIPT_DIR/peakminer" ]; then
+if [ -f "$SCRIPT_DIR/peakminer" ] && [ -x "$SCRIPT_DIR/peakminer" ]; then
     PEAK_BIN="$SCRIPT_DIR/peakminer"
-elif [ -x "$SCRIPT_DIR/peakminer/peakminer" ]; then
+elif [ -f "$SCRIPT_DIR/peakminer/peakminer" ] && [ -x "$SCRIPT_DIR/peakminer/peakminer" ]; then
     PEAK_BIN="$SCRIPT_DIR/peakminer/peakminer"
 elif [ -f "$SCRIPT_DIR/peakminer/v2.18.1/peakminer-2.18.1.tar.gz" ]; then
     echo "[*] Extracting peakminer from peakminer-2.18.1.tar.gz..."

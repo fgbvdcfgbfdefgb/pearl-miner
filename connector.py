@@ -13,6 +13,10 @@ Features:
 
 import os
 import sys
+try:
+    sys.stdout.reconfigure(line_buffering=True)
+except Exception:
+    pass
 import time
 import json
 import socket
@@ -38,27 +42,27 @@ RED     = "\033[91m"
 
 def log_info(msg):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{ts}] {CYAN}[INFO]{RESET} {msg}")
+    print(f"[{ts}] {CYAN}[INFO]{RESET} {msg}", flush=True)
 
 def log_stratum(msg):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{ts}] {BLUE}{BOLD}[STRATUM]{RESET} {msg}")
+    print(f"[{ts}] {BLUE}{BOLD}[STRATUM]{RESET} {msg}", flush=True)
 
 def log_github(msg):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{ts}] {MAGENTA}{BOLD}[GITHUB]{RESET} {msg}")
+    print(f"[{ts}] {MAGENTA}{BOLD}[GITHUB]{RESET} {msg}", flush=True)
 
 def log_success(msg):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{ts}] {GREEN}{BOLD}[SUCCESS]{RESET} {msg}")
+    print(f"[{ts}] {GREEN}{BOLD}[SUCCESS]{RESET} {msg}", flush=True)
 
 def log_warn(msg):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{ts}] {YELLOW}[WARN]{RESET} {msg}")
+    print(f"[{ts}] {YELLOW}[WARN]{RESET} {msg}", flush=True)
 
 def log_error(msg):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{ts}] {RED}[ERROR]{RESET} {msg}")
+    print(f"[{ts}] {RED}[ERROR]{RESET} {msg}", flush=True)
 
 
 class GitHubSyncManager:
@@ -328,7 +332,7 @@ class StratumBridgeClient:
         self.sock = None
         self.sock_file = None
 
-    def send_submit(self, share: dict) -> int:
+    def send_submit(self, share: dict, callback=None) -> int:
         """Sends mining.submit to the Kryptex Pearl pool."""
         if not self.connected or not self.sock:
             log_error("Cannot submit share: not connected to Stratum pool")
@@ -337,6 +341,9 @@ class StratumBridgeClient:
         with self.lock:
             sub_id = self.req_id
             self.req_id += 1
+
+            if callback:
+                self.pending_submits[sub_id] = callback
 
             # Extract fields flexibly
             job_id = share.get("job_id", self.current_job_id)
@@ -558,10 +565,8 @@ class StratumBridgeClient:
                         result_holder["resp"] = resp
                         event.set()
 
-                    sub_id = self.send_submit(share)
+                    sub_id = self.send_submit(share, callback=on_response)
                     if sub_id != -1:
-                        self.pending_submits[sub_id] = on_response
-
                         # Wait for pool reply
                         if event.wait(timeout=5.0):
                             resp = result_holder.get("resp", {})

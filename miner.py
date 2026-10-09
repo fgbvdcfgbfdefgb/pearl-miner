@@ -18,6 +18,10 @@ Architecture:
 
 import os
 import sys
+try:
+    sys.stdout.reconfigure(line_buffering=True)
+except Exception:
+    pass
 import time
 import json
 import struct
@@ -26,7 +30,7 @@ import socket
 import argparse
 import threading
 from datetime import datetime, timezone
-import torch.multiprocessing as mp
+import multiprocessing as mp
 import numpy as np
 
 try:
